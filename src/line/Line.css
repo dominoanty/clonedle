@@ -1,0 +1,8 @@
+.letterRow {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+.activeLetterRow {
+    border: 1px solid green;
+}
