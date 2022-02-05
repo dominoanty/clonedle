@@ -116,7 +116,6 @@ function App() {
 
       {notInDictionaryAlert === true ? <div className="not-in-dictionary-alert"> Word not in dictionary </div> : <div/>}
       {victoryAchieved === true ? <div className="victory-achieved-alert"> Victory Achieved! </div> : <div/>}
-      {wordToBeGuessed}
       <div className="keyboard">
         <div className="keyboard-toprow">
           {topRowKeys.split('').map(letter => <KeyboardLetter letter={letter} onClick={handleKeyboardClick} disabled={disabledKeyboardLetters[letter]} />)}
