@@ -47,7 +47,7 @@ function FailDialog(props) {
     <div>
       { (props.fail === true) ?
          <div className="fail-dialog">
-             <p>Try Again!</p> 
+             <p>The word was <span className="fail-dialog-actual-word">{props.actualWord}</span>.</p> 
              <div className="restart-button" onClick={props.onRestartClick}>↻</div> 
           </div> : <div/>
         }
@@ -172,7 +172,7 @@ function App() {
       {/* {wordToBeGuessed} */}
       {notInDictionaryAlert === true ? <div className="not-in-dictionary-alert"> Word not in dictionary </div> : <div/>}
       <VictoryDialog victoryAchieved={victoryAchieved} onRestartClick={handleRestartClick}/>
-      <FailDialog fail={failed} onRestartClick={handleRestartClick}/>
+      <FailDialog actualWord={wordToBeGuessed} fail={failed} onRestartClick={handleRestartClick}/>
       <div className="keyboard">
         <div className="keyboard-toprow">
           {topRowKeys.split('').map(letter => <KeyboardLetter letter={letter} onClick={handleKeyboardClick} disabled={disabledKeyboardLetters[letter]} />)}
