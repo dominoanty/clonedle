@@ -20,12 +20,40 @@ function getDisplayLetter(letter) {
 function KeyboardLetter(props) {
 
   return (
-    <div className={"keyboard-letter " + (props.disabled ? "keyboard-letter-disabled" : "")} onClick={() => { if (props.disabled != true) { props.onClick(props.letter) } }}>
+    <div className={"keyboard-letter " 
+    + (props.disabled ? "keyboard-letter-disabled " : "")
+    + (props.letter === ENTER || props.letter === BACKSPACE ? "special-keyboard-letter " : "")
+    } onClick={() => { if (props.disabled != true) { props.onClick(props.letter) } }}>
       {getDisplayLetter(props.letter)}
     </div>
   )
 }
 
+function VictoryDialog(props) {
+  return (
+    <div>
+      { (props.victoryAchieved === true) ?
+         <div className="victory-dialog">
+             <p>Victory Achieved!</p> 
+             <div className="restart-button" onClick={props.onRestartClick}>↻</div> 
+          </div> : <div/>
+        }
+    </div>
+  )
+}
+
+function FailDialog(props) {
+  return (
+    <div>
+      { (props.fail === true) ?
+         <div className="fail-dialog">
+             <p>Try Again!</p> 
+             <div className="restart-button" onClick={props.onRestartClick}>↻</div> 
+          </div> : <div/>
+        }
+    </div>
+  )
+}
 function App() {
 
   const numLetters = 5;
@@ -42,6 +70,8 @@ function App() {
   const [dictionary, setDictionary] = useState({});
   const [notInDictionaryAlert, setNotInDictionaryAlert] = useState(false);
   const [victoryAchieved, setVictoryAchieved] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const [triggerRestart, setTriggerRestart] = useState(false);
 
   useEffect(() => {
     setWordToBeGuessed(words[Math.floor(Math.random() * words.length)]);
@@ -51,6 +81,23 @@ function App() {
     }
     setDictionary(dictionary);
   }, [])
+
+  useEffect(() => {
+    if (triggerRestart) {
+      setWordToBeGuessed(words[Math.floor(Math.random() * words.length)]);
+      setActiveLine(0);
+      setWord("");
+      setTriggerRestart(false);
+      setVictoryAchieved(false);
+      setGuesses([]);
+      setDisabledKeyboardLetters({})
+      setFailed(false);
+    }
+  }, [triggerRestart])
+
+  const handleRestartClick = () => {
+    setTriggerRestart(true);
+  }
 
   const handleKeyboardClick = (letter) => {
     console.log("clicked: ", letter)
@@ -69,6 +116,7 @@ function App() {
 
           const lettersToBeDisabled = []
           let solvedCount = 0;
+          // Copy pasted logic from checking if Solved/Unsolved
           for (let i = 0; i < word.length; i++) {
             if (word.charAt(i) == wordToBeGuessed.charAt(i)) {
               letterCountForActualWord[word.charAt(i)] -= 1
@@ -83,10 +131,17 @@ function App() {
           }
           const updatedLetterDisabledSet = { ...disabledKeyboardLetters }
           for (let letter of lettersToBeDisabled) {
-            updatedLetterDisabledSet[letter] = true
+            // Only disable if key is not in the actual word.
+            if (wordToBeGuessed.indexOf(letter) === -1) {
+              updatedLetterDisabledSet[letter] = true
+            }
           }
           if (solvedCount === numLetters) {
             setVictoryAchieved(true);
+          } else {
+            if (activeLine + 1 >= numGuesses) {
+              setFailed(true);
+            }
           }
           setDisabledKeyboardLetters(updatedLetterDisabledSet);
 
@@ -114,8 +169,10 @@ function App() {
           <Line numLetters={numLetters} actualWord={wordToBeGuessed} guessAtLine={guesses[number]} currentGuess={word} lineIndex={number} currentActiveIndex={activeLine} />)}
       </div>
 
+      {/* {wordToBeGuessed} */}
       {notInDictionaryAlert === true ? <div className="not-in-dictionary-alert"> Word not in dictionary </div> : <div/>}
-      {victoryAchieved === true ? <div className="victory-achieved-alert"> Victory Achieved! </div> : <div/>}
+      <VictoryDialog victoryAchieved={victoryAchieved} onRestartClick={handleRestartClick}/>
+      <FailDialog fail={failed} onRestartClick={handleRestartClick}/>
       <div className="keyboard">
         <div className="keyboard-toprow">
           {topRowKeys.split('').map(letter => <KeyboardLetter letter={letter} onClick={handleKeyboardClick} disabled={disabledKeyboardLetters[letter]} />)}
